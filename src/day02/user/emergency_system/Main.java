@@ -12,89 +12,149 @@ import day02.user.emergency_system.units.PoliceCar;
 import java.util.Scanner;
 
 public class Main {
-    public static Scanner sc = new Scanner(System.in);
+   private static final Scanner scanner = new Scanner(System.in);
 
-    public static DispatchCenter dispatchCenter = new DispatchCenter();
+   private static final DispatchCenter center = new DispatchCenter();
+
     static void main(String[] args) {
 
-    }
+        seedData();
 
-    public void runApplication() {
-        DispatchCenter center = new DispatchCenter();
+        boolean isRunning = true;
 
-        boolean running = true;
+        while (isRunning) {
 
-        while (running) {
-            System.out.println("\n=====SYSTEM RATUNKOWY 112=====");
-            System.out.println("1. - dodaj zgłoszenie");
-            System.out.println("2. - przydziel jednostki");
-            System.out.println("3. - pokaz aktywne zgłoszenia");
-            System.out.println("4 - pokaz jednostki");
-            System.out.println("5 - zakończ zgłoszenie");
-            System.out.println("6. - historia zgłoszeń");
-            System.out.println("7. - filtruj zgłoszenia po priorytecie");
-            System.out.println("0. - wyjście");
+            showMenu();
 
-            int choice = Integer.parseInt(sc.nextLine());
+            int choice = Integer.parseInt(scanner.nextLine());
 
             switch (choice) {
-                case 1:
-                    System.out.println("\nPodaj typ zgloszenia");
-                    System.out.println("1. Medyczne");
-                    System.out.println("2. Pożar");
-                    System.out.println("3. Wypadek");
 
-                    int type = Integer.parseInt(sc.nextLine());
+                case 1 -> addReport();
+                case 2 -> center.dispatchUnits();
+                case 3 -> center.showActiveReports();
+                case 4 -> center.showUnits();
+                case 5 -> finishReport();
+                case 6 -> center.showHistory();
+                case 7 -> filterReportsByPriority();
+                case 8 -> center.showTodayReports();
+                case 9 -> center.saveHistoryToCsvFile();
+                case 0 -> {
+                    isRunning = false;
+                    System.out.println("Zamykanie systemu");
+                }
 
-                    System.out.println("Podaj swoją lokalizację");
-                    String location = sc.nextLine();
-
-                    System.out.println("Podaj opis zgłoszenia:");
-                    String description = sc.nextLine();
-
-                    //todo - dodac wybieranie priorytetu
-                    Priority priority = choosePriority();
-
-                    EmergencyReport report = switch (type) {
-                        case 1 -> new MedicalReport(location, description, priority);
-                        case 2 -> new FireReport(location, description, priority);
-                        case 3 -> new AccidentReport(location, description, priority);
-                        default -> null;
-                    };
-
-                    if (report != null) {
-                        center.addReport(report);
-                        System.out.println("Dodano zgłoszenie");
-                    } else {
-                        System.out.println("Nieprawidłowy typ zgłoszenia");
-                    }
+                default -> System.out.println("Wybrłeś nieprawidłową opcję");
             }
         }
     }
 
-    private static Priority choosePriority() {
-        System.out.println("\nPriorytet");
-        System.out.println("1. LOW");
-        System.out.println("2. MEDIUM");
-        System.out.println("3. HIGH");
+   private static void showMenu() {
+       System.out.println("\n-----SYSTEM RATUNKOWY-----");
 
-        int choice = Integer.parseInt(sc.nextLine());
+       System.out.println("1. Dodaj zgłoszenie");
+       System.out.println("2. Przydziel jednostki");
+       System.out.println("3. Pokaż aktywne zgłoszenia");
+       System.out.println("4. Pokaż jednostki");
+       System.out.println("5. Zakończ zgłoszenie");
+       System.out.println("6. Historia zgłoszeń");
+       System.out.println("7. Filtruj zgłoszenia po priorytecie");
+       System.out.println("8. Pokaż dzisiejsze zgłoszenia");
+       System.out.println("9. Zapisz historię do pliku csv");
+       System.out.println("0. Wyjście z programu");
+   }
 
-        return switch (choice) {
-            case 1 -> Priority.LOW;
-            case 2 -> Priority.MEDIUM;
-            case 3 -> Priority.HIGH;
-            default -> Priority.MEDIUM;
-        };
-    }
+   private static void  seedData() {
 
-    private static void seedData() {
-        dispatchCenter.addUnit(new Ambulans("A-01", "Cenrum"));
-        dispatchCenter.addUnit(new Ambulans("A-2", "Południe"));
-        dispatchCenter.addUnit(new Ambulans("A-3", "Zachód"));
-        dispatchCenter.addUnit(new FireTruck("FT-01", "Zachód"));
-        dispatchCenter.addUnit(new PoliceCar("PC-1", "Wschód"));
-        dispatchCenter.addUnit(new PoliceCar("PC-2", "Północ"));
-    }
+       center.addUnit(new Ambulans("A1", "Północ"));
+       center.addUnit(new PoliceCar("P1", "Południe"));
+       center.addUnit(new PoliceCar("P2", "Zachód"));
+       center.addUnit(new FireTruck("FT1", "Wschód"));
+   }
+
+   private static void addReport() {
+
+       System.out.println("\nTyp zgłoszenia");
+
+       System.out.println("1. Medyczne");
+       System.out.println("2. Pożar");
+       System.out.println("3. Wypadek");
+       int type = Integer.parseInt(scanner.nextLine());
+
+       System.out.println("Podaj lokalizację");
+       String location = scanner.nextLine();
+
+       System.out.println("Podaj opis zgłoszenia");
+       String description = scanner.nextLine();
+
+       Priority priority = choosePriority();
+
+       EmergencyReport report = switch (type) {
+
+           case 1 -> new MedicalReport(
+                   location,
+                   description,
+                   priority
+           );
+
+           case 2 -> new FireReport(
+                   location,
+                   description,
+                   priority
+           );
+
+           case 3 -> new AccidentReport(
+                   location,
+                   description,
+                   priority
+           );
+
+           default -> null;
+       };
+
+       if (report != null) {
+           center.addReport(report);
+
+           System.out.println("Dodano nowe zgłoszenie");
+       } else {
+           System.out.println("Nieprawidłowy typ zgłoszenia");
+       }
+
+   }
+
+   private static Priority choosePriority() {
+
+       System.out.println("\nPriorytet");
+
+       System.out.println("1. LOW");
+       System.out.println("2. MEDIUM");
+       System.out.println("3. HIGH");
+
+       int choice = Integer.parseInt(scanner.nextLine());
+
+       return switch (choice) {
+           case 1 -> Priority.LOW;
+           case 2 -> Priority.MEDIUM;
+           case 3 -> Priority.HIGH;
+           default -> Priority.MEDIUM;
+       };
+   }
+
+   private static void finishReport() {
+
+       System.out.println("Podaj id zgloszenia do zakończenia");
+       int id = Integer.parseInt(scanner.nextLine());
+
+       center.finishReport(id);
+
+       System.out.println("Zgłoszenie o id" + id + " zostało zakończone");
+   }
+
+   private static void filterReportsByPriority() {
+
+       Priority priority = choosePriority();
+
+       center.showReportsByPriority(priority);
+   }
 
 }

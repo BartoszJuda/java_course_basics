@@ -11,7 +11,7 @@ public class Ambulans extends EmergencyUnit {
 
     @Override
     public String getUnitType() {
-        return "";
+        return "Ambulans";
     }
 
     @Override

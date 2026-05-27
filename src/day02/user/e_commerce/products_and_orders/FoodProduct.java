@@ -6,7 +6,11 @@ public class FoodProduct extends Product{
 
     private String expirationDate;
 
-    public FoodProduct(int id, String name, double price, int quantity, String expirationDate) {
+    public FoodProduct(int id,
+                       String name,
+                       double price,
+                       int quantity,
+                       String expirationDate) {
         super(id, name, price, quantity, ProductCategory.FOOD);
         this.expirationDate = expirationDate;
     }

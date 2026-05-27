@@ -1,8 +1,13 @@
 package day02.user.emergency_system;
 
+import day02.user.emergency_system.enums.Priority;
 import day02.user.emergency_system.reports.EmergencyReport;
 import day02.user.emergency_system.units.EmergencyUnit;
 
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -26,12 +31,16 @@ public class DispatchCenter {
     public void dispatchUnits() {
 
         if (reports.isEmpty()) {
-            System.out.println("brak wezwań pomocy");
+
+            System.out.println("Brak zgłoszeń.");
+
             return;
         }
 
-        reports.sort(Comparator.comparing(EmergencyReport::getPriority)
-                .reversed());
+        reports.sort(
+                Comparator.comparing(EmergencyReport::getPriority)
+                        .reversed()
+        );
 
         for (EmergencyReport report : reports) {
 
@@ -39,16 +48,27 @@ public class DispatchCenter {
                 continue;
             }
 
-            Optional<EmergencyUnit> foundedUnit = units.stream()
+            Optional<EmergencyUnit> foundUnit = units.stream()
+
                     .filter(EmergencyUnit::isAvailable)
 
-                    .filter(unit -> unit.getUnitType().equals(report.getRequiredUnitType()))
+                    .filter(unit ->
+                            unit.getUnitType()
+                                    .equals(report.getRequiredUnitType())
+                    )
+
                     .findFirst();
 
-            if (foundedUnit.isPresent()) {
-                foundedUnit.get().dispatchTo(report);
-            } else {
-                System.out.println("Brak wolnej jednostki do przydzielenia do zgłoszenia #" + report.getId());
+            if (foundUnit.isPresent()) {
+
+                foundUnit.get().dispatchTo(report);
+            }
+            else {
+
+                System.out.println(
+                        "Brak wolnej jednostki dla zgłoszenia #"
+                                + report.getId()
+                );
             }
         }
     }
@@ -96,9 +116,77 @@ public class DispatchCenter {
                         foundedReport.getId(),
                         foundedReport.getReportType(),
                         foundedReport.getPriority(),
+                        foundedReport.getCreatedAt(),
+                        LocalDateTime.now(),
                         foundedReport.generateSummary()
                 )
         );
         System.out.println("Zgloszenie #" + id + " zostalo zakończone");
+    }
+
+    public void showReportsByPriority(Priority priority) {
+
+        boolean found = false;
+
+        System.out.println("\nZgłoszenia o priorytecie: " + priority);
+
+        for (EmergencyReport report : reports) {
+            if (report.getPriority() == priority) {
+                System.out.println(report.generateSummary());
+                found = true;
+            }
+        }
+        if(!found) {
+            System.out.println("Brak zgłoszeń o takim priorytecie");
+        }
+    }
+
+    public void showHistory() {
+        if (history.isEmpty()) {
+            System.out.println("Historia jest pusta");
+            return;
+        }
+
+        System.out.println("\nHistoria:");
+
+        for (HistoryEntry entry : history) {
+            entry.print();
+
+            System.out.println("----------");
+        }
+    }
+
+    public void showTodayReports() {
+        LocalDateTime now = LocalDateTime.now();
+
+        boolean founded = false;
+
+        System.out.println("\nDzisiejsze aktywne zgłoszenia");
+
+        for (EmergencyReport report : reports) {
+            if (report.getCreatedAt().toLocalDate().equals(now.toLocalDate())) {
+                System.out.println(report.generateSummary());
+                founded = true;
+            }
+        }
+        if (!founded) {
+            System.out.println("Brak dzisejszych aktywnych zgłoszeń");
+        }
+    }
+
+    public void saveHistoryToCsvFile() {
+        try {
+            PrintWriter writer = new PrintWriter(new FileWriter("historia_zgłoszeń.csv"));
+
+            writer.println("id;typ;priorytet;data_zgłoszenia;data_zakończenia;czas_obsługi_zgłoszenia_minuty;podsumowanie");
+
+            for (HistoryEntry entry : history) {
+                writer.println(entry.toCsvFormat());
+            }
+
+
+        } catch (IOException e) {
+            System.out.println("Wystąpił błąd podczas zapisu pliku csv: " + e.getMessage());
+        }
     }
 }

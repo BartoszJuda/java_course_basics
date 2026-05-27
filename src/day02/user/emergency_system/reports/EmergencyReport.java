@@ -5,6 +5,8 @@ import day02.user.emergency_system.interfaces.Reportable;
 import day02.user.emergency_system.enums.Priority;
 import day02.user.emergency_system.enums.UnitStatus;
 
+import java.time.LocalDateTime;
+
 public abstract class EmergencyReport implements Reportable {
 
     private static int counter = 1;
@@ -13,6 +15,8 @@ public abstract class EmergencyReport implements Reportable {
     private final String location;
     private final String description;
     private final Priority priority;
+
+    private final LocalDateTime createdAt;
 
     private boolean completed;
 
@@ -24,6 +28,8 @@ public abstract class EmergencyReport implements Reportable {
         this.location = location;
         this.description = description;
         this.priority = priority;
+
+        this.createdAt = LocalDateTime.now();
         this.completed = false;
     }
 
@@ -37,6 +43,10 @@ public abstract class EmergencyReport implements Reportable {
 
     public int getId() {
         return id;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
     }
 
     public EmergencyUnit getAssignedUnit() {
@@ -76,6 +86,7 @@ public abstract class EmergencyReport implements Reportable {
                 + " | Lokalizacja: " + location
                 + " | Opis: " + description
                 + " | Priorytet: " + priority
+                + " | Data zgłoszenia: " + createdAt
                 + " | Jednostka" + unitInfo
                 + " | Status" + (completed ? "Zakończone" : "Aktywne");
     }
