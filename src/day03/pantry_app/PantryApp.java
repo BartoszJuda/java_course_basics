@@ -1,6 +1,6 @@
 package day03.pantry_app;
 
-import day03.enums.Category;
+import day03.pantry_app.enums.Category;
 import day03.pantry_app.exceptions.InvalidProductDataException;
 import day03.pantry_app.models.CleaningProduct;
 import day03.pantry_app.models.FoodProduct;

@@ -1,4 +1,4 @@
-package day03.enums;
+package day03.pantry_app.enums;
 
 public enum Category {
     FOOD,
